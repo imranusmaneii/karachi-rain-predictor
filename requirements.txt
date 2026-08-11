@@ -5,6 +5,7 @@ matplotlib>=3.8
 seaborn>=0.13
 scikit-learn>=1.5
 joblib>=1.4
+xgboost>=2.0
 
 # Data acquisition
 requests>=2.31
