@@ -30,7 +30,7 @@ historical weather. Educational, phase-by-phase, classical ML only (no TF/PyTorc
   test 2018-04-15..2026-08-10 (3,040 rows, rain 24.8%). split_idx = 12156.
   Saved: `data/processed/splits/{X_train,X_test,y_train,y_test}.csv`.
 
-## Phases completed (notebooks 01-07 pushed to GitHub)
+## Phases completed (notebooks 01-08 pushed to GitHub)
 1. Data exploration — `notebooks/01_data_exploration.ipynb`
 2. Data cleaning — `notebooks/02_data_cleaning.ipynb` + `src/data_preprocessing.py`
 3. Feature engineering — `notebooks/03_feature_engineering.ipynb` + `src/feature_engineering.py`
@@ -48,14 +48,21 @@ historical weather. Educational, phase-by-phase, classical ML only (no TF/PyTorc
    - XGBoost:          AUC 0.922, thr 0.70, Prec 0.736 / Rec 0.725 / F1 0.731
    Champion saved: `models/karachi_rain_model.pkl` = {model_name, threshold, pipeline} (gitignored).
 
-## Phase 8 — IN PROGRESS (unfinished)
-- `src/tune.py` written: randomized CV search (ROC-AUC objective, 3-fold StratifiedKFold) for
-  GradientBoosting and XGBoost, then OOF threshold tuning, then one-time test evaluation,
-  saves champion to `models/karachi_rain_model.pkl`. NOT yet run/committed.
-- `notebooks/08_hyperparameter_tuning.ipynb` BUILT but NOT executed. nbconvert execution was
-  failing silently (no output, cells not run) — last attempt also produced nothing. Needs
-  debugging: try `--ExecutePreprocessor.timeout=1800` issue / rerun nbconvert manually.
-- TODO: get notebook 08 executed, run `python src/tune.py`, commit + push tune.py and notebook.
+## Phase 8 — COMPLETE (hyperparameter tuning, committed)
+- `src/tune.py` — randomized CV search (ROC-AUC, 3-fold StratifiedKFold) for GradientBoosting
+  and XGBoost, OOF threshold tuning (Phase 6 protocol), one-time test evaluation.
+- `notebooks/08_hyperparameter_tuning.ipynb` executed (nbconvert, kernel karachi-rain).
+  Earlier silent failures were just the tool's 30-min timeout — the run needs ~32 min;
+  rerun with `--ExecutePreprocessor.timeout=1800` and a >45 min shell timeout.
+- Results (one-time test eval, F1-max thresholds):
+  - GB best CV ROC-AUC 0.8891, params {lr 0.03, depth 5, leaf 20, trees 369, subsample 1.0},
+    thr 0.25 → test F1 0.729
+  - XGB best CV ROC-AUC 0.8928, params {lr 0.03, depth 6, mcw 5, trees 271, subsample 0.7,
+    colsample 1.0}, thr 0.75 → test F1 0.711
+- Honest finding: tuning did NOT beat the Phase 7 defaults (tuned GB 0.729 vs Phase 7 GB 0.743).
+  Champion was therefore restored to the Phase 7 GradientBoosting via `python src/train.py`
+  (test F1 0.743 @ threshold 0.25) → `models/karachi_rain_model.pkl`. Noted in notebook 08.
+- Phase 4 split CSVs (`data/processed/splits/*.csv`) now committed (were untracked).
 
 ## Next phases (planned, not started)
 - Phase 9: feature importance / error analysis
