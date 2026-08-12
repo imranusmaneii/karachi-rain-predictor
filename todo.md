@@ -30,7 +30,7 @@ historical weather. Educational, phase-by-phase, classical ML only (no TF/PyTorc
   test 2018-04-15..2026-08-10 (3,040 rows, rain 24.8%). split_idx = 12156.
   Saved: `data/processed/splits/{X_train,X_test,y_train,y_test}.csv`.
 
-## Phases completed (notebooks 01-08 pushed to GitHub)
+## Phases completed (notebooks 01-09 pushed to GitHub)
 1. Data exploration — `notebooks/01_data_exploration.ipynb`
 2. Data cleaning — `notebooks/02_data_cleaning.ipynb` + `src/data_preprocessing.py`
 3. Feature engineering — `notebooks/03_feature_engineering.ipynb` + `src/feature_engineering.py`
@@ -64,8 +64,27 @@ historical weather. Educational, phase-by-phase, classical ML only (no TF/PyTorc
   (test F1 0.743 @ threshold 0.25) → `models/karachi_rain_model.pkl`. Noted in notebook 08.
 - Phase 4 split CSVs (`data/processed/splits/*.csv`) now committed (were untracked).
 
+## Phase 9 — COMPLETE (feature importance & error analysis, committed)
+- `src/analyze.py` — feature names (post-transform), impurity & permutation importance,
+  error tagging (`error_frame`), grouped error rates (`error_breakdown`).
+- `notebooks/09_feature_importance_error_analysis.ipynb` executed (15 code cells, 4 figures).
+- Champion recap (GB @ thr 0.25): Acc 0.871 / Prec 0.734 / Rec 0.752 / F1 0.743.
+- Feature importance — the two measures DISAGREE (the key lesson):
+  - Impurity: WeatherCode 0.296, Rainfall 0.229, CloudCoverage 0.135 dominate.
+  - Permutation (test, 5 reps): MinTemperature (AUC drop 0.060), CloudCoverage (0.057),
+    Rainfall (0.016), Pressure (0.015). WeatherCode falls to #7 (0.010) — its impurity
+    score is inflated by being a many-valued code; temperature/cloud/pressure carry
+    the same signal. Month & Season are near-useless (Season_* all < 0.002).
+- Error analysis (test, 3,040 days; 754 rainy / 2,286 dry → 567 TP / 187 FN / 206 FP / 2080 TN):
+  - Monsoon months: low miss rate (Jul 8% / Aug 13%) but MOST false alarms (Jul 17.6%,
+    Aug 14.7%, Jun+Sep ~15% of days). Over-alerting exactly when it rains a lot.
+  - Dry months: rain is rare and the model MISSES most of it (Mar-Apr miss 75-80% of
+    rainy days; Nov misses 100% of its 5). Off-season rain looks like ordinary days.
+  - Missed days look like *partly* cloudy (CloudCoverage 40 vs 69 for caught) — no clear
+    signal; false alarms look monsoon-like (humidity 76, cloud 62) but rain never fell.
+  - No strong temporal drift: miss rate 24% (2018) ... 36% (2026, partial year), no trend.
+
 ## Next phases (planned, not started)
-- Phase 9: feature importance / error analysis
 - Phase 10+: src/predict.py, FastAPI `api/main.py` (POST /predict), Streamlit `app/app.py`,
   README.md.
 
