@@ -30,7 +30,7 @@ historical weather. Educational, phase-by-phase, classical ML only (no TF/PyTorc
   test 2018-04-15..2026-08-10 (3,040 rows, rain 24.8%). split_idx = 12156.
   Saved: `data/processed/splits/{X_train,X_test,y_train,y_test}.csv`.
 
-## Phases completed (notebooks 01-09 pushed to GitHub)
+## Phases completed (notebooks 01-09 pushed to GitHub; phases 1-10 done)
 1. Data exploration — `notebooks/01_data_exploration.ipynb`
 2. Data cleaning — `notebooks/02_data_cleaning.ipynb` + `src/data_preprocessing.py`
 3. Feature engineering — `notebooks/03_feature_engineering.ipynb` + `src/feature_engineering.py`
@@ -84,9 +84,19 @@ historical weather. Educational, phase-by-phase, classical ML only (no TF/PyTorc
     signal; false alarms look monsoon-like (humidity 76, cloud 62) but rain never fell.
   - No strong temporal drift: miss rate 24% (2018) ... 36% (2026, partial year), no trend.
 
+## Phase 10 — COMPLETE (prediction service, committed)
+- `src/predict.py` — loads champion artifact, validates the 16 features, returns
+  {probability, prediction, label, threshold}. Self-test: `python src/predict.py`.
+- `api/main.py` — FastAPI. `GET /health` (model + threshold), `POST /predict`.
+  Run: `.venv\Scripts\python -m uvicorn api.main:app --reload`. Tested live:
+  /health ok, /predict → 0.4474 Rain (monsoon example).
+- `app/app.py` — Streamlit dashboard (form for 16 features, probability + verdict).
+  Run: `.venv\Scripts\python -m streamlit run app/app.py`. Tested via AppTest:
+  0 exceptions, predict click returns 41% Rain.
+- Note: installs verified (fastapi 0.141.1, uvicorn 0.52.1, streamlit 1.61.1 already in venv).
+
 ## Next phases (planned, not started)
-- Phase 10+: src/predict.py, FastAPI `api/main.py` (POST /predict), Streamlit `app/app.py`,
-  README.md.
+- README.md (project overview, setup, how to run API/app).
 
 ## Git log (pushed to main)
 e8b9416 .. c7d5337 (12 commits) then:
